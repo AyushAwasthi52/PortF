@@ -15,7 +15,7 @@ export default function MapBackground({ width, height }: MapBackgroundProps) {
       {/* Base texture layer */}
       <div className={styles.textureLayer} />
       
-      <svg width="100%" height="100%" viewBox="0 0 2000 1200" preserveAspectRatio="none" className={styles.svgLayer} xmlns="http://www.w3.org/2000/svg">
+      <svg width="100%" height="100%" viewBox="0 0 8000 4800" preserveAspectRatio="none" className={styles.svgLayer} xmlns="http://www.w3.org/2000/svg">
         <defs>
           <pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse">
             <path d="M 100 0 L 0 0 0 100" fill="none" stroke="rgba(255, 255, 255, 0.05)" strokeWidth="1" />

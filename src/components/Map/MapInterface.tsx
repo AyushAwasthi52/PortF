@@ -7,8 +7,8 @@ import MapPin from './MapPin';
 import ProfilePanel from './ProfilePanel';
 import styles from './MapInterface.module.css';
 
-const MAP_WIDTH = 4000;
-const MAP_HEIGHT = 2400;
+const MAP_WIDTH = 8000;
+const MAP_HEIGHT = 4800;
 const RETICLE_RADIUS = 60;
 
 export default function MapInterface() {
@@ -21,15 +21,34 @@ export default function MapInterface() {
   const mapY = useMotionValue(0);
   const mapScale = useMotionValue(1);
 
-  const selectedProfile = profilesData.find(p => p.id === selectedId) || null;
+  const [dragConstraints, setDragConstraints] = useState({ left: 0, right: 0, top: 0, bottom: 0 });
+  const minScale = 0.3; // Hardcoded minimum scale
 
+  // Center the map initially and set constraints
   useEffect(() => {
     if (containerRef.current) {
       const { clientWidth, clientHeight } = containerRef.current;
-      mapX.set((clientWidth - MAP_WIDTH) / 2);
-      mapY.set((clientHeight - MAP_HEIGHT) / 2);
+      
+      // Initialize map scale if it's below minScale
+      let currentScale = mapScale.get();
+      if (currentScale < minScale) {
+        currentScale = minScale;
+        mapScale.set(currentScale);
+      }
+
+      mapX.set((clientWidth - MAP_WIDTH * currentScale) / 2);
+      mapY.set((clientHeight - MAP_HEIGHT * currentScale) / 2);
+
+      setDragConstraints({
+        left: clientWidth - MAP_WIDTH * currentScale,
+        right: 0,
+        top: clientHeight - MAP_HEIGHT * currentScale,
+        bottom: 0,
+      });
     }
-  }, [mapX, mapY]);
+  }, [mapX, mapY, mapScale]);
+
+  const selectedProfile = profilesData.find(p => p.id === selectedId) || null;
 
   const checkCollisions = useCallback(() => {
     if (!containerRef.current) return;
@@ -80,8 +99,16 @@ export default function MapInterface() {
       const mapCenterY = (clientHeight / 2 - mapY.get()) / oldScale;
       
       // Calculate new mapX and mapY to keep that map point at the center of the screen
-      const newX = clientWidth / 2 - mapCenterX * newScale;
-      const newY = clientHeight / 2 - mapCenterY * newScale;
+      let newX = clientWidth / 2 - mapCenterX * newScale;
+      let newY = clientHeight / 2 - mapCenterY * newScale;
+
+      // Clamp newX and newY to the new drag constraints to prevent flying off screen
+      const minX = clientWidth - MAP_WIDTH * newScale;
+      const minY = clientHeight - MAP_HEIGHT * newScale;
+      newX = Math.max(minX, Math.min(newX, 0));
+      newY = Math.max(minY, Math.min(newY, 0));
+
+      setDragConstraints({ left: minX, right: 0, top: minY, bottom: 0 });
 
       if (animateZoom) {
         animate(mapScale, newScale, { duration: 0.1 });
@@ -106,6 +133,15 @@ export default function MapInterface() {
       if (e.key === 'ArrowRight') { newX -= panSpeed; didPan = true; }
       
       if (didPan) {
+        // Clamp to constraints
+        if (containerRef.current) {
+          const { clientWidth, clientHeight } = containerRef.current;
+          const currentScale = mapScale.get();
+          const minX = clientWidth - MAP_WIDTH * currentScale;
+          const minY = clientHeight - MAP_HEIGHT * currentScale;
+          newX = Math.max(minX, Math.min(newX, 0));
+          newY = Math.max(minY, Math.min(newY, 0));
+        }
         animate(mapX, newX, { duration: 0.1 });
         animate(mapY, newY, { duration: 0.1 });
       }
@@ -114,7 +150,7 @@ export default function MapInterface() {
         doZoom(Math.min(mapScale.get() + 0.1, 2), true);
       }
       if (e.key.toLowerCase() === 'x') {
-        doZoom(Math.max(mapScale.get() - 0.1, 0.3), true);
+        doZoom(Math.max(mapScale.get() - 0.1, minScale), true);
       }
     };
     
@@ -122,7 +158,7 @@ export default function MapInterface() {
       e.preventDefault();
       const zoomSpeed = 0.001;
       let newScale = mapScale.get() - (e.deltaY * zoomSpeed);
-      newScale = Math.max(0.3, Math.min(newScale, 2));
+      newScale = Math.max(minScale, Math.min(newScale, 2));
       doZoom(newScale, false);
     };
 
@@ -139,20 +175,7 @@ export default function MapInterface() {
         container.removeEventListener('wheel', handleWheel);
       }
     };
-  }, [mapX, mapY, mapScale]);
-
-  const [dragConstraints, setDragConstraints] = useState({ left: 0, right: 0, top: 0, bottom: 0 });
-  useEffect(() => {
-    if (containerRef.current) {
-      const { clientWidth, clientHeight } = containerRef.current;
-      setDragConstraints({
-        left: clientWidth - MAP_WIDTH,
-        right: 0,
-        top: clientHeight - MAP_HEIGHT,
-        bottom: 0,
-      });
-    }
-  }, []);
+  }, [mapX, mapY, mapScale, minScale]);
 
   return (
     <div className={styles.container} ref={containerRef}>
