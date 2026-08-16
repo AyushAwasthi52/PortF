@@ -70,43 +70,60 @@ export default function MapInterface() {
 
   // Keyboard and Wheel handling
   useEffect(() => {
+    const doZoom = (newScale: number, animateZoom: boolean) => {
+      if (!containerRef.current) return;
+      const { clientWidth, clientHeight } = containerRef.current;
+      const oldScale = mapScale.get();
+      
+      // The point on the map that is currently at the center of the screen
+      const mapCenterX = (clientWidth / 2 - mapX.get()) / oldScale;
+      const mapCenterY = (clientHeight / 2 - mapY.get()) / oldScale;
+      
+      // Calculate new mapX and mapY to keep that map point at the center of the screen
+      const newX = clientWidth / 2 - mapCenterX * newScale;
+      const newY = clientHeight / 2 - mapCenterY * newScale;
+
+      if (animateZoom) {
+        animate(mapScale, newScale, { duration: 0.1 });
+        animate(mapX, newX, { duration: 0.1 });
+        animate(mapY, newY, { duration: 0.1 });
+      } else {
+        mapScale.set(newScale);
+        mapX.set(newX);
+        mapY.set(newY);
+      }
+    };
+
     const handleKeyDown = (e: KeyboardEvent) => {
       const panSpeed = 60;
       let newX = mapX.get();
       let newY = mapY.get();
-      let newScale = mapScale.get();
-      let didChange = false;
+      let didPan = false;
 
-      if (e.key === 'ArrowUp') { newY += panSpeed; didChange = true; }
-      if (e.key === 'ArrowDown') { newY -= panSpeed; didChange = true; }
-      if (e.key === 'ArrowLeft') { newX += panSpeed; didChange = true; }
-      if (e.key === 'ArrowRight') { newX -= panSpeed; didChange = true; }
+      if (e.key === 'ArrowUp') { newY += panSpeed; didPan = true; }
+      if (e.key === 'ArrowDown') { newY -= panSpeed; didPan = true; }
+      if (e.key === 'ArrowLeft') { newX += panSpeed; didPan = true; }
+      if (e.key === 'ArrowRight') { newX -= panSpeed; didPan = true; }
       
-      if (e.key.toLowerCase() === 'z') {
-        newScale = Math.min(newScale + 0.1, 2);
-        didChange = true;
-      }
-      if (e.key.toLowerCase() === 'x') {
-        newScale = Math.max(newScale - 0.1, 0.3);
-        didChange = true;
-      }
-
-      if (didChange) {
+      if (didPan) {
         animate(mapX, newX, { duration: 0.1 });
         animate(mapY, newY, { duration: 0.1 });
-        animate(mapScale, newScale, { duration: 0.1 });
+      }
+
+      if (e.key.toLowerCase() === 'z') {
+        doZoom(Math.min(mapScale.get() + 0.1, 2), true);
+      }
+      if (e.key.toLowerCase() === 'x') {
+        doZoom(Math.max(mapScale.get() - 0.1, 0.3), true);
       }
     };
     
     const handleWheel = (e: WheelEvent) => {
-      // Zoom on scroll
-      e.preventDefault(); // Stop native scrolling
+      e.preventDefault();
       const zoomSpeed = 0.001;
       let newScale = mapScale.get() - (e.deltaY * zoomSpeed);
-      newScale = Math.max(0.3, Math.min(newScale, 2)); // Clamp scale
-      
-      // We set instantly instead of animating for a responsive feel
-      mapScale.set(newScale);
+      newScale = Math.max(0.3, Math.min(newScale, 2));
+      doZoom(newScale, false);
     };
 
     window.addEventListener('keydown', handleKeyDown);
