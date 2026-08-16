@@ -21,30 +21,25 @@ export default function MapInterface() {
   const mapY = useMotionValue(0);
   const mapScale = useMotionValue(1);
 
-  const [dragConstraints, setDragConstraints] = useState({ left: 0, right: 0, top: 0, bottom: 0 });
-  const minScale = 0.3; // Hardcoded minimum scale
+  const minScale = 0.3;
 
-  // Center the map initially and set constraints
+  // Center the map initially
   useEffect(() => {
     if (containerRef.current) {
       const { clientWidth, clientHeight } = containerRef.current;
       
-      // Initialize map scale if it's below minScale
       let currentScale = mapScale.get();
       if (currentScale < minScale) {
         currentScale = minScale;
         mapScale.set(currentScale);
       }
 
-      mapX.set((clientWidth - MAP_WIDTH * currentScale) / 2);
-      mapY.set((clientHeight - MAP_HEIGHT * currentScale) / 2);
-
-      setDragConstraints({
-        left: clientWidth - MAP_WIDTH * currentScale,
-        right: 0,
-        top: clientHeight - MAP_HEIGHT * currentScale,
-        bottom: 0,
-      });
+      // We want the center of the map (MAP_WIDTH/2) to be at the center of the screen (clientWidth/2)
+      // Visual center X = mapX + MAP_WIDTH/2
+      // We want Visual center X = clientWidth/2
+      // Therefore, mapX = clientWidth/2 - MAP_WIDTH/2
+      mapX.set(clientWidth / 2 - MAP_WIDTH / 2);
+      mapY.set(clientHeight / 2 - MAP_HEIGHT / 2);
     }
   }, [mapX, mapY, mapScale]);
 
@@ -54,18 +49,26 @@ export default function MapInterface() {
     if (!containerRef.current) return;
     const { clientWidth, clientHeight } = containerRef.current;
     
-    const centerX = clientWidth / 2;
-    const centerY = clientHeight / 2;
+    const screenCenterX = clientWidth / 2;
+    const screenCenterY = clientHeight / 2;
     const scale = mapScale.get();
 
     let foundId: string | null = null;
 
     for (const profile of profilesData) {
-      // With transformOrigin '0 0', the scaled position is map + (coord * scale)
-      const pinScreenX = mapX.get() + profile.coordinates.x * scale;
-      const pinScreenY = mapY.get() + profile.coordinates.y * scale;
+      // With default transformOrigin (center), the visual center of the map is:
+      const visualMapCenterX = mapX.get() + MAP_WIDTH / 2;
+      const visualMapCenterY = mapY.get() + MAP_HEIGHT / 2;
 
-      const distance = Math.hypot(pinScreenX - centerX, pinScreenY - centerY);
+      // The pin's offset from the center of the unscaled map:
+      const offsetX = profile.coordinates.x - MAP_WIDTH / 2;
+      const offsetY = profile.coordinates.y - MAP_HEIGHT / 2;
+
+      // The actual visual screen coordinate of the pin:
+      const pinScreenX = visualMapCenterX + (offsetX * scale);
+      const pinScreenY = visualMapCenterY + (offsetY * scale);
+
+      const distance = Math.hypot(pinScreenX - screenCenterX, pinScreenY - screenCenterY);
 
       if (distance <= RETICLE_RADIUS) {
         foundId = profile.id;
@@ -93,22 +96,16 @@ export default function MapInterface() {
       if (!containerRef.current) return;
       const { clientWidth, clientHeight } = containerRef.current;
       const oldScale = mapScale.get();
+      const screenCenterX = clientWidth / 2;
+      const screenCenterY = clientHeight / 2;
       
-      // The point on the map that is currently at the center of the screen
-      const mapCenterX = (clientWidth / 2 - mapX.get()) / oldScale;
-      const mapCenterY = (clientHeight / 2 - mapY.get()) / oldScale;
+      // Calculate the map offset currently under the screen center
+      const offsetX = (screenCenterX - mapX.get() - MAP_WIDTH / 2) / oldScale;
+      const offsetY = (screenCenterY - mapY.get() - MAP_HEIGHT / 2) / oldScale;
       
-      // Calculate new mapX and mapY to keep that map point at the center of the screen
-      let newX = clientWidth / 2 - mapCenterX * newScale;
-      let newY = clientHeight / 2 - mapCenterY * newScale;
-
-      // Clamp newX and newY to the new drag constraints to prevent flying off screen
-      const minX = clientWidth - MAP_WIDTH * newScale;
-      const minY = clientHeight - MAP_HEIGHT * newScale;
-      newX = Math.max(minX, Math.min(newX, 0));
-      newY = Math.max(minY, Math.min(newY, 0));
-
-      setDragConstraints({ left: minX, right: 0, top: minY, bottom: 0 });
+      // Calculate new mapX/mapY so the same offset stays under the screen center
+      const newX = screenCenterX - MAP_WIDTH / 2 - offsetX * newScale;
+      const newY = screenCenterY - MAP_HEIGHT / 2 - offsetY * newScale;
 
       if (animateZoom) {
         animate(mapScale, newScale, { duration: 0.1 });
@@ -133,15 +130,6 @@ export default function MapInterface() {
       if (e.key === 'ArrowRight') { newX -= panSpeed; didPan = true; }
       
       if (didPan) {
-        // Clamp to constraints
-        if (containerRef.current) {
-          const { clientWidth, clientHeight } = containerRef.current;
-          const currentScale = mapScale.get();
-          const minX = clientWidth - MAP_WIDTH * currentScale;
-          const minY = clientHeight - MAP_HEIGHT * currentScale;
-          newX = Math.max(minX, Math.min(newX, 0));
-          newY = Math.max(minY, Math.min(newY, 0));
-        }
         animate(mapX, newX, { duration: 0.1 });
         animate(mapY, newY, { duration: 0.1 });
       }
@@ -175,7 +163,7 @@ export default function MapInterface() {
         container.removeEventListener('wheel', handleWheel);
       }
     };
-  }, [mapX, mapY, mapScale, minScale]);
+  }, [mapX, mapY, mapScale]);
 
   return (
     <div className={styles.container} ref={containerRef}>
@@ -186,12 +174,11 @@ export default function MapInterface() {
           x: mapX, 
           y: mapY, 
           scale: mapScale,
-          transformOrigin: '0 0', // Crucial for correct distance math
           width: MAP_WIDTH, 
           height: MAP_HEIGHT 
         }}
         drag
-        dragConstraints={dragConstraints}
+        dragConstraints={containerRef}
         dragElastic={0.1}
         dragMomentum={false}
         whileDrag={{ cursor: 'grabbing' }}
@@ -218,7 +205,6 @@ export default function MapInterface() {
         </span>
       </div>
 
-      {/* Instructions HUD */}
       <div className={styles.instructions}>
         DRAG or ARROWS: Pan | SCROLL or Z/X: Zoom
       </div>
