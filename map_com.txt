@@ -1,0 +1,1035 @@
+CODING PROFILES SECTION — COMPLETE SPECIFICATION
+
+CONCEPT:
+The Coding Profiles section is an original reinterpretation of the tactical/map interface from Resident Evil 4 Remake.
+
+The visitor enters a dark, atmospheric map interface containing several locations/pins. Each location represents one of my coding/developer profiles.
+
+The map should feel like a real interactive navigation system rather than a conventional grid of social links.
+
+The inspiration should be recognizable to Resident Evil 4 players through:
+- parchment/map-like visual treatment
+- muted earthy colors
+- topographic/geographic linework
+- location markers
+- subtle UI overlays
+- directional indicators
+- map navigation
+- cinematic transitions
+- information panels
+- tactical/game-like interaction
+
+However, this must be an ORIGINAL implementation.
+Do not use ripped RE4 maps, textures, icons, sounds, logos, or other proprietary assets.
+
+
+==================================================
+1. PRIMARY USER FLOW
+==================================================
+
+Main Menu
+    ↓
+CODING PROFILES
+    ↓
+Map transition / map opening animation
+    ↓
+Full-screen interactive map
+    ↓
+User sees profile locations/pins
+    ↓
+User selects a pin
+    ↓
+Selected location becomes highlighted
+    ↓
+Camera smoothly moves/zooms toward the location
+    ↓
+Profile information panel appears
+    ↓
+User can:
+    - inspect statistics
+    - open external profile
+    - return to map
+    - select another profile
+
+
+==================================================
+2. PROFILE LOCATIONS
+==================================================
+
+Initial profiles should support:
+
+- GitHub
+- Codeforces
+- CodeChef
+- LeetCode
+- LinkedIn
+- HackerRank
+- Other coding/developer platforms
+
+However, the architecture must NOT hardcode these platforms into the UI.
+
+Profiles should come from structured data.
+
+Example conceptual data model:
+
+Profile:
+    id
+    name
+    platform
+    username
+    url
+    icon
+    coordinates
+    description
+    statistics
+    color/accent
+    category
+    featured
+    metadata
+
+Example:
+
+{
+    id: "codeforces",
+    name: "Codeforces",
+    username: "...",
+    url: "...",
+    coordinates: {
+        x: ...,
+        y: ...
+    },
+    description: "...",
+    statistics: {
+        rating: "...",
+        solved: "..."
+    }
+}
+
+
+==================================================
+3. MAP DESIGN
+==================================================
+
+The map should occupy most of the viewport.
+
+Desktop:
+
+--------------------------------------------------
+| MAP                                  UI PANEL   |
+|                                                |
+|       ○ GitHub                                 |
+|                                                |
+|                    ○ Codeforces                |
+|                                                |
+|                              ○ LeetCode        |
+|                                                |
+|   ○ CodeChef                                   |
+|                                                |
+|                           ○ HackerRank         |
+|                                                |
+--------------------------------------------------
+
+The map should not look like Google Maps.
+
+It should be an illustrated fictional tactical map.
+
+Use:
+- irregular terrain
+- roads
+- paths
+- topographic contours
+- regions
+- rivers
+- landmarks
+- hand-drawn linework
+- subtle grid
+- compass
+- coordinates
+- labels
+
+The locations themselves do not need to correspond to real geography.
+
+The map is metaphorical.
+
+Each coding platform is a "location" in my developer journey.
+
+
+==================================================
+4. MAP VISUAL STYLE
+==================================================
+
+Visual characteristics:
+
+- dark parchment
+- aged paper
+- desaturated brown/green/grey tones
+- subtle paper grain
+- slightly worn edges
+- hand-drawn linework
+- subtle vignette
+- low-contrast background
+- highlighted interactive elements
+- cinematic shadows
+
+Do not make the map overly detailed.
+
+The profile pins must remain visually dominant.
+
+
+==================================================
+5. MAP PINS
+==================================================
+
+Every profile gets a unique map pin.
+
+Default state:
+
+- subtle
+- slightly animated
+- low brightness
+- recognizable silhouette
+
+Hover state:
+
+- pin becomes brighter
+- subtle scale increase
+- tooltip appears
+- nearby area may slightly illuminate
+
+Selected state:
+
+- stronger glow/highlight
+- animated ring/pulse
+- platform name appears
+- map camera moves toward it
+
+Visited state:
+
+- optionally change appearance slightly so the user knows they have already explored it
+
+
+==================================================
+6. PIN TOOLTIP
+==================================================
+
+When hovering over a pin:
+
+--------------------------------
+CODEFORCES
+Competitive Programming
+Rating: 1208
+--------------------------------
+
+The tooltip should be compact.
+
+Do not display the entire profile.
+
+Clicking the pin opens the full profile panel.
+
+
+==================================================
+7. CAMERA / MAP MOVEMENT
+==================================================
+
+The map should support:
+
+- pan
+- zoom in
+- zoom out
+- reset view
+- focus selected location
+
+When a user selects a profile:
+
+1. Current map position is captured.
+2. Map smoothly pans toward the selected coordinates.
+3. Map optionally zooms in.
+4. Pin becomes emphasized.
+5. Profile panel appears.
+
+Do not instantly teleport the camera.
+
+Use smooth interpolation.
+
+The animation should feel like moving around a tactical map.
+
+
+==================================================
+8. MAP CONTROLS
+==================================================
+
+Provide unobtrusive map controls.
+
+Possible controls:
+
++ Zoom in
+- Zoom out
+⌖ Recenter
+? Map legend
+
+Keyboard:
+
+Arrow keys:
+    Pan map
+
++ / -:
+    Zoom
+
+Escape:
+    Close selected profile
+
+Enter:
+    Select focused pin
+
+Tab:
+    Navigate interactive pins
+
+Mouse:
+    Drag map
+    Scroll to zoom
+
+Touch:
+    Drag
+    Pinch zoom
+
+
+==================================================
+9. COMPASS
+==================================================
+
+Include a subtle compass somewhere in the interface.
+
+It should be decorative but functional.
+
+Possible:
+
+        N
+        ↑
+    W ← + → E
+        ↓
+        S
+
+The compass can remain fixed to the viewport while the map moves.
+
+
+==================================================
+10. MAP COORDINATES
+==================================================
+
+Optionally add subtle coordinates around the map.
+
+Example:
+
+A-04
+A-05
+A-06
+
+B-04
+B-05
+B-06
+
+These are purely atmospheric.
+
+They should never interfere with usability.
+
+
+==================================================
+11. PROFILE INFORMATION PANEL
+==================================================
+
+When a pin is selected, show an information panel.
+
+Desktop:
+The panel can occupy approximately 25–35% of the viewport.
+
+Example:
+
+------------------------------------------
+CODEFORCES
+
+AYUSH AWASTHI
+@username
+
+Competitive Programming
+
+RATING
+1208
+
+PROBLEMS SOLVED
+XXX
+
+CONTESTS
+XX
+
+CURRENT RANK
+...
+
+------------------------------------------
+
+[ VIEW PROFILE ]
+
+[ CLOSE ]
+
+The panel should feel like a tactical information window.
+
+Avoid conventional modern dashboard styling.
+
+
+==================================================
+12. PROFILE INFORMATION HIERARCHY
+==================================================
+
+The panel should prioritize:
+
+1. Platform name
+2. Username
+3. Platform icon
+4. Short description
+5. Most important statistic
+6. Secondary statistics
+7. External profile link
+
+Do not overwhelm the visitor with statistics.
+
+Only show information that actually helps communicate my experience.
+
+
+==================================================
+13. PLATFORM STATISTICS
+==================================================
+
+The system should allow each platform to have different statistics.
+
+For example:
+
+CODEFORCES:
+
+Rating
+Max Rating
+Problems Solved
+Contests
+Rank
+
+LEETCODE:
+
+Problems Solved
+Easy
+Medium
+Hard
+Contest Rating
+Global Rank
+
+CODECHEF:
+
+Rating
+Stars
+Problems Solved
+Contests
+
+GITHUB:
+
+Repositories
+Followers
+Contributions
+Stars
+
+Do NOT force all platforms into the same statistics schema.
+
+Statistics should be flexible.
+
+Example:
+
+statistics: [
+    {
+        label: "Rating",
+        value: "1208"
+    },
+    {
+        label: "Problems",
+        value: "XXX"
+    }
+]
+
+
+==================================================
+14. PLATFORM ICONS
+==================================================
+
+Each location should have a recognizable icon.
+
+Use:
+- original/simple vector representations
+- official brand assets only where their licensing permits
+- text-based identifiers when necessary
+
+Do not copy RE4 icons.
+
+The platform identity should remain recognizable.
+
+
+==================================================
+15. PROFILE CATEGORIES
+==================================================
+
+Profiles can optionally be grouped into categories:
+
+COMPETITIVE PROGRAMMING
+    Codeforces
+    CodeChef
+    LeetCode
+
+DEVELOPMENT
+    GitHub
+
+PROFESSIONAL
+    LinkedIn
+
+OTHER
+    HackerRank
+    etc.
+
+The category system should exist in the data model even if it is not initially exposed in the UI.
+
+
+==================================================
+16. MAP LEGEND
+==================================================
+
+Create a small optional map legend.
+
+Example:
+
+MAP LEGEND
+
+● Competitive Programming
+● Development
+● Professional
+● Other
+
+The legend can be toggled.
+
+Do not keep it permanently large on screen.
+
+
+==================================================
+17. PROFILE DISCOVERY
+==================================================
+
+The user should be able to discover profiles in multiple ways.
+
+Primary:
+    Click map pin
+
+Secondary:
+    Keyboard navigation
+
+Optional:
+    Profile list
+
+A small "LOCATIONS" panel could show:
+
+LOCATIONS
+
+01  GitHub
+02  Codeforces
+03  CodeChef
+04  LeetCode
+05  LinkedIn
+
+Selecting an item from this list should move the map to that pin.
+
+This is especially important for accessibility.
+
+
+==================================================
+18. PROFILE LIST
+==================================================
+
+If included, the list should not look like a normal portfolio card grid.
+
+It should look like a navigation/mission list.
+
+Example:
+
+LOCATIONS
+
+01 ── GITHUB
+02 ── CODEFORCES
+03 ── LEETCODE
+04 ── CODECHEF
+05 ── LINKEDIN
+
+Hovering a list item:
+    highlight corresponding pin
+
+Selecting:
+    move camera to pin
+    open profile panel
+
+
+==================================================
+19. ANIMATION SYSTEM
+==================================================
+
+Entering the Coding Profiles section:
+
+MAIN MENU
+    ↓
+Screen fades/dims
+    ↓
+Map surface appears
+    ↓
+Map expands into viewport
+    ↓
+Map lines/details reveal progressively
+    ↓
+Pins appear one by one
+    ↓
+Interface becomes interactive
+
+The transition should feel like unfolding/opening a tactical map.
+
+Avoid long animations.
+
+Target:
+    ~700ms–1500ms for major transitions
+
+
+==================================================
+20. IDLE ANIMATION
+==================================================
+
+When nothing is selected:
+
+- map may have extremely subtle movement
+- paper grain can move slightly
+- pins can have subtle pulsing
+- compass can remain static
+- UI should remain calm
+
+Do not create constant distracting motion.
+
+
+==================================================
+21. SELECTED PIN ANIMATION
+==================================================
+
+Selected pin:
+
+    idle
+       ↓
+    scale slightly
+       ↓
+    highlight ring
+       ↓
+    location label
+       ↓
+    camera movement
+       ↓
+    profile panel reveal
+
+The selected pin should remain visually connected to the information panel.
+
+
+==================================================
+22. MAP TRANSITION BACK
+==================================================
+
+When closing a profile:
+
+Profile panel:
+    slides/fades away
+
+Map:
+    smoothly returns to previous camera position
+
+Do not reset the map to its original position unless the user explicitly selects "recenter."
+
+
+==================================================
+23. RESPONSIVE DESIGN
+==================================================
+
+Desktop:
+    full map
+    profile panel on side
+    controls around edges
+
+Tablet:
+    slightly simplified map
+    panel can overlay map
+
+Mobile:
+    map remains interactive
+    profile panel becomes bottom sheet
+
+Mobile flow:
+
+-------------------------
+|                       |
+|        MAP            |
+|                       |
+|       ●               |
+|                       |
+-------------------------
+| CODEFORCES            |
+| Rating: 1208          |
+|                        |
+| [VIEW PROFILE]        |
+-------------------------
+
+The map must not become unusable on small screens.
+
+
+==================================================
+24. ACCESSIBILITY
+==================================================
+
+The map must not be the ONLY way to access profiles.
+
+Provide an accessible semantic navigation/list.
+
+Every pin must have:
+- accessible name
+- keyboard focus
+- visible focus state
+- screen-reader label
+
+Example:
+
+"Codeforces profile, rating 1208"
+
+Keyboard users should be able to navigate every profile without needing a mouse.
+
+
+==================================================
+25. EXTERNAL LINK BEHAVIOR
+==================================================
+
+VIEW PROFILE should open the external profile.
+
+Prefer opening external profiles in a new tab.
+
+Use clear external-link indicators.
+
+Do not navigate the portfolio away from the map unnecessarily.
+
+
+==================================================
+26. DATA ARCHITECTURE
+==================================================
+
+Profiles must be configuration-driven.
+
+Do NOT write:
+
+if platform === "codeforces"
+    render...
+
+throughout the UI.
+
+Instead:
+
+profiles.ts / profiles.json
+
+contains profile data.
+
+The UI renders generic profile objects.
+
+This makes adding a new platform trivial.
+
+Example conceptual structure:
+
+profiles = [
+    {
+        id,
+        platform,
+        username,
+        url,
+        coordinates,
+        description,
+        category,
+        statistics,
+        icon,
+        featured
+    }
+]
+
+
+==================================================
+27. STATE MANAGEMENT
+==================================================
+
+Keep map state local to the Coding Profiles section unless global navigation genuinely requires it.
+
+State may include:
+
+- selectedProfile
+- hoveredProfile
+- focusedProfile
+- mapPosition
+- zoomLevel
+- showLegend
+- showProfileList
+
+Do not introduce a global state library merely for this section.
+
+Use the simplest appropriate state management solution.
+
+
+==================================================
+28. PERFORMANCE
+==================================================
+
+The map should remain performant.
+
+Avoid:
+- huge raster images
+- excessive DOM nodes
+- expensive blur filters everywhere
+- constantly running animations
+- unnecessary re-renders
+
+Prefer:
+- SVG
+- CSS
+- canvas only where genuinely beneficial
+- optimized textures
+- GPU-friendly transforms
+
+The map should remain smooth on normal laptops and mobile devices.
+
+
+==================================================
+29. SOUND
+
+Sound is optional.
+
+If implemented:
+
+- subtle map interaction sound
+- pin selection sound
+- menu navigation sound
+- panel opening sound
+
+Use original/licensed sound effects.
+
+Do NOT use extracted Resident Evil 4 sound effects or music.
+
+There should also be a way to disable interface sounds.
+
+
+==================================================
+30. VISUAL DEPTH
+
+The map should have several visual layers:
+
+Layer 1:
+    paper/background
+
+Layer 2:
+    terrain
+
+Layer 3:
+    roads/rivers
+
+Layer 4:
+    landmarks
+
+Layer 5:
+    coordinates/grid
+
+Layer 6:
+    profile pins
+
+Layer 7:
+    interaction highlights
+
+Layer 8:
+    UI overlays
+
+This should create a convincing sense of depth without becoming visually noisy.
+
+
+==================================================
+31. ATMOSPHERE
+
+The section should feel:
+
+- mysterious
+- tactical
+- exploratory
+- technical
+- cinematic
+- restrained
+
+It should NOT feel:
+
+- cartoonish
+- neon cyberpunk
+- generic SaaS
+- modern dashboard
+- overly gamified
+
+
+==================================================
+32. INFORMATION DENSITY
+
+The map itself should remain visually clean.
+
+Do not place every statistic directly on the map.
+
+The map communicates:
+
+"Where are my profiles?"
+
+The information panel communicates:
+
+"What have I accomplished there?"
+
+
+==================================================
+33. OPTIONAL FEATURE — PROFILE CONNECTIONS
+
+Consider drawing subtle lines between related profiles.
+
+For example:
+
+Codeforces
+    ↕
+CodeChef
+    ↕
+LeetCode
+
+This could visually communicate that these platforms belong to the same area of my developer journey.
+
+Keep this extremely subtle.
+
+
+==================================================
+34. OPTIONAL FEATURE — EXPLORATION TRACKING
+
+The UI can optionally remember which profile locations the visitor has explored during their session.
+
+For example:
+
+Explored:
+    ✓ GitHub
+    ✓ Codeforces
+    ○ LeetCode
+    ○ CodeChef
+
+This should be purely client-side.
+
+Do not send this data anywhere.
+
+
+==================================================
+35. OPTIONAL FEATURE — "YOU ARE HERE"
+
+Include a subtle player-location marker.
+
+Example:
+
+YOU ARE HERE
+
+The marker represents the visitor currently viewing the map.
+
+It can remain fixed while the map moves or move depending on the interaction model.
+
+This is primarily atmospheric.
+
+
+==================================================
+36. EMPTY / ERROR STATES
+==================================================
+
+If profile data fails to load:
+
+Do not show a generic React error.
+
+Display an in-world message:
+
+"LOCATION DATA UNAVAILABLE"
+
+[ RETRY ]
+
+If an external profile cannot be reached:
+
+"DESTINATION UNAVAILABLE"
+
+[ TRY AGAIN ]
+
+
+==================================================
+37. EXIT EXPERIENCE
+==================================================
+
+Escape/back button:
+
+MAP
+    ↓
+fade/zoom out
+    ↓
+return to MAIN MENU
+
+The transition should make it feel like leaving the map interface rather than navigating to another webpage.
+
+
+==================================================
+38. DESIGN PRINCIPLE
+
+The most important principle:
+
+The map is not decoration.
+
+The map IS the navigation mechanism.
+
+Every visual element should reinforce the idea that my online coding presence consists of different "locations" that the visitor can explore.
+
+The final experience should make the visitor think:
+
+"I am exploring this developer's coding world."
+
+Not:
+
+"This developer put social media icons on a map."
+
+
+==================================================
+39. FINAL EXPERIENCE
+
+The ideal sequence is:
+
+MAIN MENU
+    ↓
+CODING PROFILES
+    ↓
+MAP OPENS
+    ↓
+MAP REVEALS
+    ↓
+PINS APPEAR
+    ↓
+USER EXPLORES
+    ↓
+SELECTS CODEFORCES
+    ↓
+CAMERA MOVES
+    ↓
+PROFILE PANEL OPENS
+    ↓
+USER INSPECTS STATISTICS
+    ↓
+VIEW PROFILE
+    ↓
+EXTERNAL PROFILE OPENS
+    ↓
+USER RETURNS
+    ↓
+MAP REMAINS WHERE THEY LEFT IT
+    ↓
+SELECT ANOTHER PROFILE
+
+
+The entire section should feel like a polished, interactive game interface while remaining a professional developer portfolio component.

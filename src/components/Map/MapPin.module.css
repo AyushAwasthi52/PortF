@@ -1,0 +1,119 @@
+.pinContainer {
+  position: absolute;
+  /* Transform to center the pin exactly on the coordinate */
+  transform: translate(-50%, -50%);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pin {
+  width: 40px;
+  height: 40px;
+  background: rgba(20, 20, 20, 0.8);
+  border: 1px solid rgba(200, 180, 150, 0.4);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.2s ease;
+  outline: none;
+  pointer-events: none; /* Let dragging pass through */
+}
+
+.pin:focus-visible {
+  border-color: rgba(200, 180, 150, 0.9);
+  box-shadow: 0 0 10px rgba(200, 180, 150, 0.5);
+}
+
+.icon {
+  color: rgba(200, 180, 150, 0.7);
+  font-family: monospace;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.hovered {
+  border-color: rgba(200, 180, 150, 0.8);
+  background: rgba(40, 40, 35, 0.9);
+  transform: scale(1.1);
+}
+
+.hovered .icon {
+  color: rgba(200, 180, 150, 1);
+}
+
+.selected {
+  border-color: #f0e6d2;
+  background: rgba(60, 50, 40, 0.9);
+  transform: scale(1.15);
+  box-shadow: 0 0 15px rgba(200, 180, 150, 0.4);
+}
+
+.selected .icon {
+  color: #f0e6d2;
+}
+
+.selectedRing {
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  right: -5px;
+  bottom: -5px;
+  border-radius: 50%;
+  border: 1px solid rgba(200, 180, 150, 0.8);
+  pointer-events: none;
+}
+
+.tooltip {
+  position: absolute;
+  top: 50px;
+  background: rgba(15, 15, 12, 0.95);
+  border: 1px solid rgba(150, 130, 100, 0.3);
+  padding: 8px 12px;
+  min-width: 150px;
+  text-align: center;
+  pointer-events: none;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  border-radius: 2px;
+  z-index: 30;
+}
+
+.tooltip::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 8px;
+  height: 8px;
+  background: rgba(15, 15, 12, 0.95);
+  border-top: 1px solid rgba(150, 130, 100, 0.3);
+  border-left: 1px solid rgba(150, 130, 100, 0.3);
+}
+
+.tooltipName {
+  color: #f0e6d2;
+  font-family: monospace;
+  font-weight: bold;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  margin-bottom: 2px;
+}
+
+.tooltipCategory {
+  color: rgba(200, 180, 150, 0.6);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 4px;
+}
+
+.tooltipStat {
+  color: rgba(200, 180, 150, 0.9);
+  font-family: monospace;
+  font-size: 0.75rem;
+}

@@ -1,0 +1,85 @@
+.mapBackground {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: #1a1814; /* Dark earthy tone */
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.textureLayer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+}
+
+.svgLayer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.compass {
+  position: fixed;
+  bottom: 40px;
+  right: 40px;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.3);
+  font-family: monospace;
+  z-index: 10;
+  pointer-events: none;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+}
+
+.compassN {
+  position: absolute;
+  top: 5px;
+}
+
+.compassS {
+  position: absolute;
+  bottom: 5px;
+}
+
+.compassCross {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 5px;
+}
+
+.compassCenter {
+  font-size: 1.2rem;
+}
+
+.coordinates {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.coordLabel {
+  position: absolute;
+  color: rgba(255, 255, 255, 0.2);
+  font-family: monospace;
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+}

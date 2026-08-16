@@ -48,7 +48,7 @@ export default function ProjectsPage() {
         >
           <h1 className={styles.title}>ATTACHÉ CASE</h1>
           <div className={styles.capacity}>
-            <span>CAPACITY: 5/30</span>
+            <span>CAPACITY: {projectsData.length}/30</span>
           </div>
         </motion.div>
       </div>
