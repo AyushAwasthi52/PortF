@@ -12,8 +12,8 @@ export interface ProjectData {
   year: number;
   gridWidth: number;
   gridHeight: number;
-  x: number;
-  y: number;
+  x?: number;
+  y?: number;
   rotation?: number; // 0, 90, 180, 270
   icon?: string;
 }
@@ -89,5 +89,28 @@ export const projectsData: ProjectData[] = [
     gridHeight: 1,
     x: 3,
     y: 1,
+  },
+  {
+    id: 'proj-6',
+    title: 'Cyber Deck',
+    shortDescription: 'Cyberpunk Portfolio',
+    detailedDescription: 'My previous portfolio website styled like a retro cyberpunk terminal.',
+    technologies: ['Vue', 'CSS', 'Vite'],
+    githubUrl: 'https://github.com/example/cyber-deck',
+    category: 'Web',
+    year: 2022,
+    gridWidth: 1,
+    gridHeight: 1,
+  },
+  {
+    id: 'proj-7',
+    title: 'Auto-Placed App',
+    shortDescription: 'Testing the auto-packer',
+    detailedDescription: 'This project has no x or y coordinates defined, and is completely new, so the bin-packing algorithm will find a clean spot for it automatically!',
+    technologies: ['TypeScript', 'Bin Packing'],
+    category: 'Other',
+    year: 2026,
+    gridWidth: 2,
+    gridHeight: 1,
   }
 ];

@@ -38,39 +38,6 @@ export default function AttacheCase({ initialProjects }: AttacheCaseProps) {
   const boardRef = useRef<HTMLDivElement>(null);
   const { playHover, playSelect, playLift, playPlace, playRotate, playError } = useAudio();
 
-  // Load from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem('attache-layout');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        const updated = initialProjects.map(p => {
-          const savedPos = parsed.find((sp: any) => sp.id === p.id);
-          if (savedPos) {
-            return { 
-              ...p, 
-              x: savedPos.x, 
-              y: savedPos.y, 
-              rotation: savedPos.r || 0
-            };
-          }
-          return { ...p, rotation: p.rotation || 0 };
-        });
-        setProjects(updated);
-      } catch (e) {
-        console.error("Failed to parse layout", e);
-      }
-    } else {
-      setProjects(initialProjects.map(p => ({ ...p, rotation: p.rotation || 0 })));
-    }
-  }, [initialProjects]);
-
-  // Save to localStorage
-  useEffect(() => {
-    const layout = projects.map(p => ({ id: p.id, x: p.x, y: p.y, r: p.rotation || 0 }));
-    localStorage.setItem('attache-layout', JSON.stringify(layout));
-  }, [projects]);
-
   // Helper to calculate dimensions based on rotation
   const getDimensions = (id: string, rot: number) => {
     const p = initialProjects.find(p => p.id === id);
@@ -83,6 +50,84 @@ export default function AttacheCase({ initialProjects }: AttacheCaseProps) {
       unrotatedH: p.gridHeight
     };
   };
+
+  // Helper to find first empty space for a given project size
+  const findEmptySpace = (placedProjects: any[], newProject: ProjectData) => {
+    for (let y = 0; y <= GRID_ROWS - newProject.gridHeight; y++) {
+      for (let x = 0; x <= GRID_COLS - newProject.gridWidth; x++) {
+        let collision = false;
+        for (const p of placedProjects) {
+          const pDims = getDimensions(p.id, p.rotation || 0);
+          if (
+            x < Number(p.x) + Number(pDims.w) &&
+            x + newProject.gridWidth > Number(p.x) &&
+            y < Number(p.y) + Number(pDims.h) &&
+            y + newProject.gridHeight > Number(p.y)
+          ) {
+            collision = true;
+            break;
+          }
+        }
+        if (!collision) return { x, y };
+      }
+    }
+    return null; // No space found
+  };
+
+  // Load from localStorage or auto-place
+  useEffect(() => {
+    let savedLayout: any[] = [];
+    const saved = localStorage.getItem('attache-layout');
+    if (saved) {
+      try {
+        savedLayout = JSON.parse(saved);
+      } catch (e) {
+        console.error('Failed to parse saved layout', e);
+      }
+    }
+
+    const placedProjects: ProjectData[] = [];
+    
+    // First pass: Place anything with valid saved coordinates
+    initialProjects.forEach(p => {
+      const savedPos = savedLayout.find((sp: any) => sp.id === p.id);
+      if (savedPos && typeof savedPos.x === 'number' && typeof savedPos.y === 'number') {
+        placedProjects.push({ ...p, x: savedPos.x, y: savedPos.y, rotation: savedPos.r || 0 });
+      }
+    });
+
+    // Second pass: Place remaining with explicit fallback coordinates, or auto-place them
+    initialProjects.forEach(p => {
+      const isPlaced = placedProjects.some(placed => placed.id === p.id);
+      if (!isPlaced) {
+        if (p.x !== undefined && p.y !== undefined) {
+          // Explicit hardcoded coordinates fallback
+          placedProjects.push({ ...p, x: p.x, y: p.y, rotation: p.rotation || 0 });
+        } else {
+          // Auto-placement algorithm
+          const spot = findEmptySpace(placedProjects, p);
+          if (spot) {
+            placedProjects.push({ ...p, x: spot.x, y: spot.y, rotation: 0 });
+          } else {
+            // Grid full! Stack at 0,0 and let user sort it out
+            placedProjects.push({ ...p, x: 0, y: 0, rotation: 0 });
+          }
+        }
+      }
+    });
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setProjects(placedProjects);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialProjects]);
+
+  // Save to localStorage
+  useEffect(() => {
+    const layout = projects.map(p => ({ id: p.id, x: p.x, y: p.y, r: p.rotation || 0 }));
+    localStorage.setItem('attache-layout', JSON.stringify(layout));
+  }, [projects]);
+
+
 
   const getCollisions = (dummy: {id: string, x: number, y: number, rotation: number}) => {
     const dims = getDimensions(dummy.id, dummy.rotation);
@@ -401,8 +446,8 @@ export default function AttacheCase({ initialProjects }: AttacheCaseProps) {
               key={project.id}
               className={`${styles.projectItem} ${isHovered ? styles.keyboardHover : ''} ${isLifted ? styles.lifted : ''}`}
               style={{
-                left: project.x * (CELL_SIZE + GAP),
-                top: project.y * (CELL_SIZE + GAP),
+                left: (project.x ?? 0) * (CELL_SIZE + GAP),
+                top: (project.y ?? 0) * (CELL_SIZE + GAP),
                 width: dims.w * CELL_SIZE + (dims.w - 1) * GAP,
                 height: dims.h * CELL_SIZE + (dims.h - 1) * GAP,
                 zIndex: isHovered ? 50 : 10,
@@ -410,7 +455,7 @@ export default function AttacheCase({ initialProjects }: AttacheCaseProps) {
               }}
               onMouseEnter={() => {
                 if (!liftedItem) {
-                  setGridCursor({ x: project.x, y: project.y });
+                  setGridCursor({ x: project.x ?? 0, y: project.y ?? 0 });
                   setMouseHoveredId(project.id);
                   playHover();
                 }
@@ -424,8 +469,8 @@ export default function AttacheCase({ initialProjects }: AttacheCaseProps) {
                   playLift();
                   setLiftedItem({
                     id: project.id,
-                    x: project.x,
-                    y: project.y,
+                    x: project.x ?? 0,
+                    y: project.y ?? 0,
                     rotation: project.rotation || 0
                   });
                 }
@@ -502,8 +547,8 @@ export default function AttacheCase({ initialProjects }: AttacheCaseProps) {
             <div
               className={`${styles.projectItem} ${styles.lifted} ${hasError ? styles.collision : ''} ${isSwap ? styles.swapHighlight : ''}`}
               style={{
-                left: liftedItem.x * (CELL_SIZE + GAP),
-                top: liftedItem.y * (CELL_SIZE + GAP),
+                left: (liftedItem.x ?? 0) * (CELL_SIZE + GAP),
+                top: (liftedItem.y ?? 0) * (CELL_SIZE + GAP),
                 width: dims.w * CELL_SIZE + (dims.w - 1) * GAP,
                 height: dims.h * CELL_SIZE + (dims.h - 1) * GAP,
                 pointerEvents: 'none',

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useAudio } from '@/hooks/useAudio';
@@ -23,6 +23,16 @@ export default function MainMenu() {
   const router = useRouter();
 
   // Handle Keyboard Navigation
+  const handleSelect = useCallback((item: typeof MENU_ITEMS[0]) => {
+    if (isTransitioning) return;
+    playSelect();
+    setIsTransitioning(true);
+    // Add a slight delay for the cinematic transition
+    setTimeout(() => {
+      router.push(item.path);
+    }, 800);
+  }, [isTransitioning, playSelect, router]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isTransitioning) return;
@@ -40,17 +50,7 @@ export default function MainMenu() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedIndex, isTransitioning, playHover]);
-
-  const handleSelect = (item: typeof MENU_ITEMS[0]) => {
-    if (isTransitioning) return;
-    playSelect();
-    setIsTransitioning(true);
-    // Add a slight delay for the cinematic transition
-    setTimeout(() => {
-      router.push(item.path);
-    }, 800);
-  };
+  }, [selectedIndex, isTransitioning, playHover, handleSelect]);
 
   return (
     <main className={styles.mainContainer}>
