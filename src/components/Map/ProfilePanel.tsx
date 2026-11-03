@@ -17,9 +17,9 @@ export default function ProfilePanel({ profile, onClose }: ProfilePanelProps) {
         <motion.div
           ref={panelRef}
           className={styles.panel}
-          initial={{ x: '100%', opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          exit={{ x: '100%', opacity: 0 }}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 30 }}
           transition={{ type: 'spring', damping: 25, stiffness: 220 }}
           role="dialog"
           aria-labelledby="profile-title"

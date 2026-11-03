@@ -7,6 +7,7 @@ interface MapPinProps {
   profile: ProfileData;
   isSelected: boolean;
   isHovered: boolean;
+  isVisited?: boolean;
   onHoverStart: () => void;
   onHoverEnd: () => void;
   onClick: () => void;
@@ -63,6 +64,7 @@ export default function MapPin({
   profile,
   isSelected,
   isHovered,
+  isVisited,
   onHoverStart,
   onHoverEnd,
   onClick
@@ -76,7 +78,7 @@ export default function MapPin({
       transition={{ type: 'spring', damping: 15, stiffness: 200 }}
     >
       <div 
-        className={`${styles.pin} ${isSelected ? styles.selected : ''} ${isHovered && !isSelected ? styles.hovered : ''}`}
+        className={`${styles.pin} ${isSelected ? styles.selected : ''} ${isHovered && !isSelected ? styles.hovered : ''} ${isVisited ? styles.visited : ''}`}
         onMouseEnter={onHoverStart}
         onMouseLeave={onHoverEnd}
         onClick={(e) => {

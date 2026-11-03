@@ -14,6 +14,7 @@ const RETICLE_RADIUS = 60;
 export default function MapInterface() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [visitedIds, setVisitedIds] = useState<string[]>([]);
   const [showLocationsDrawer, setShowLocationsDrawer] = useState(false);
   const closedPinId = useRef<string | null>(null);
 
@@ -44,6 +45,13 @@ export default function MapInterface() {
   }, [mapX, mapY, mapScale]);
 
   const selectedProfile = profilesData.find(p => p.id === selectedId) || null;
+
+  // Track visited profiles
+  useEffect(() => {
+    if (selectedId && !visitedIds.includes(selectedId)) {
+      setVisitedIds(prev => [...prev, selectedId]);
+    }
+  }, [selectedId, visitedIds]);
 
   const checkCollisions = useCallback(() => {
     if (!containerRef.current) return;
@@ -251,6 +259,7 @@ export default function MapInterface() {
             profile={profile}
             isSelected={selectedId === profile.id}
             isHovered={hoveredId === profile.id}
+            isVisited={visitedIds.includes(profile.id)}
             onHoverStart={() => {
               playHover();
               setHoveredId(profile.id);
@@ -330,7 +339,10 @@ export default function MapInterface() {
             aria-label="Locations Directory"
           >
             <div className={styles.drawerHeader}>
-              <span className={styles.drawerTitle}>TACTICAL DIRECTORY</span>
+              <div className={styles.drawerHeaderLeft}>
+                <span className={styles.drawerTitle}>TACTICAL DIRECTORY</span>
+                <span className={styles.exploredCount}>EXPLORED // {visitedIds.length}/{profilesData.length}</span>
+              </div>
               <button 
                 className={styles.drawerClose}
                 onClick={() => {
@@ -344,26 +356,29 @@ export default function MapInterface() {
             </div>
 
             <div className={styles.locationsList}>
-              {profilesData.map((p, idx) => (
-                <button
-                  key={p.id}
-                  className={`${styles.locationItem} ${selectedId === p.id ? styles.active : ''}`}
-                  onMouseEnter={() => {
-                    playHover();
-                    setHoveredId(p.id);
-                  }}
-                  onMouseLeave={() => setHoveredId(null)}
-                  onClick={() => {
-                    focusPin(p);
-                  }}
-                >
-                  <div className={styles.locationItemLeft}>
-                    <span className={styles.locationIndex}>0{idx + 1}</span>
-                    <span className={styles.locationName}>{p.name}</span>
-                  </div>
-                  <span className={styles.locationCategory}>{p.category}</span>
-                </button>
-              ))}
+              {profilesData.map((p, idx) => {
+                const isVisited = visitedIds.includes(p.id);
+                return (
+                  <button
+                    key={p.id}
+                    className={`${styles.locationItem} ${selectedId === p.id ? styles.active : ''}`}
+                    onMouseEnter={() => {
+                      playHover();
+                      setHoveredId(p.id);
+                    }}
+                    onMouseLeave={() => setHoveredId(null)}
+                    onClick={() => {
+                      focusPin(p);
+                    }}
+                  >
+                    <div className={styles.locationItemLeft}>
+                      <span className={styles.locationIndex}>{isVisited ? '✓' : '○'} 0{idx + 1}</span>
+                      <span className={styles.locationName}>{p.name}</span>
+                    </div>
+                    <span className={styles.locationCategory}>{p.category}</span>
+                  </button>
+                );
+              })}
             </div>
           </motion.div>
         )}
