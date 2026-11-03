@@ -1,39 +1,112 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+
+# Ayush Portfolio
+
+An interactive personal portfolio website built using Next.js, React, TypeScript, CSS Modules, and Framer Motion.
+
+The project experiments with a cinematic, game-inspired interface featuring keyboard navigation, animated transitions, interactive project layouts, and custom visual components.
+
+## Features
+
+- Animated landing page
+- Keyboard-controlled navigation
+- Animated menu transitions
+- Interactive project showcase
+- Coding profile section
+- Custom map-inspired interface components
+- Audio interaction hooks
+- CSS Modules for component styling
+- Responsive UI components
+
+## Technology Stack
+
+- Next.js
+- React
+- TypeScript
+- Framer Motion
+- CSS Modules
+
+## Project Structure
+
+```text
+PortF/
+├── src/
+│   ├── app/
+│   │   ├── page.tsx
+│   │   ├── projects/
+│   │   └── profiles/
+│   │
+│   ├── components/
+│   │   ├── Map/
+│   │   └── AttacheCase.tsx
+│   │
+│   ├── data/
+│   │   ├── projects.ts
+│   │   └── profiles.ts
+│   │
+│   └── hooks/
+│       └── useAudio.ts
+│
+├── public/
+├── package.json
+└── README.md
+```
 
 ## Getting Started
 
-First, run the development server:
+Requirements:
+- Node.js
+- npm
+
+Clone the repository:
+
+```bash
+git clone https://github.com/AyushAwasthi52/PortF.git
+cd PortF
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Start development:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-
-
-.......
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```text
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Build
 
-## Learn More
+```bash
+npm run build
+npm start
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Development Notes
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The project uses an application-level navigation system with animated transitions and keyboard interaction.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Project and profile content is maintained through local TypeScript data modules.
 
-## Deploy on Vercel
+The portfolio is under development. Some menu destinations and project entries still require completion and replacement with verified links.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Future Improvements
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Complete all navigation destinations
+- Populate project cards with real repositories
+- Add live project demonstrations
+- Improve accessibility
+- Optimize mobile navigation
+- Add keyboard focus indicators
+- Improve performance and animation handling
+
+## License
+
+See the repository license information.
