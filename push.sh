@@ -15,6 +15,11 @@ if ! git commit -m "$COMMIT_MSG"; then
     exit 1
 fi
 
+if ! git pull --rebase origin main; then
+    echo "Pull/rebase failed. Please resolve conflicts."
+    exit 1
+fi
+
 if ! git push origin main; then
     echo "Push failed."
     exit 1
