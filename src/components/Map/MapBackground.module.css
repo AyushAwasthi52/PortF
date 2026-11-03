@@ -29,46 +29,6 @@
   pointer-events: none;
 }
 
-.compass {
-  position: fixed;
-  bottom: 40px;
-  right: 40px;
-  width: 80px;
-  height: 80px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: rgba(255, 255, 255, 0.3);
-  font-family: monospace;
-  z-index: 10;
-  pointer-events: none;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
-}
-
-.compassN {
-  position: absolute;
-  top: 5px;
-}
-
-.compassS {
-  position: absolute;
-  bottom: 5px;
-}
-
-.compassCross {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: 0 5px;
-}
-
-.compassCenter {
-  font-size: 1.2rem;
-}
-
 .coordinates {
   position: absolute;
   top: 0;

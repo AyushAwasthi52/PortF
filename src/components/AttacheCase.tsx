@@ -181,8 +181,8 @@ export default function AttacheCase({ initialProjects }: AttacheCaseProps) {
       playLift();
       setLiftedItem({
         id: collidedProject.id,
-        x: collidedProject.x,
-        y: collidedProject.y,
+        x: collidedProject.x ?? 0,
+        y: collidedProject.y ?? 0,
         rotation: collidedProject.rotation || 0
       });
       return;
@@ -315,8 +315,8 @@ export default function AttacheCase({ initialProjects }: AttacheCaseProps) {
               playLift();
               setLiftedItem({
                 id: itemUnderCursor.id,
-                x: itemUnderCursor.x,
-                y: itemUnderCursor.y,
+                x: itemUnderCursor.x ?? 0,
+                y: itemUnderCursor.y ?? 0,
                 rotation: itemUnderCursor.rotation || 0
               });
             }

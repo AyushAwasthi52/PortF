@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, useMotionValue, animate, useMotionValueEvent } from 'framer-motion';
-import { profilesData } from '@/data/profiles';
+import { motion, useMotionValue, animate, useMotionValueEvent, AnimatePresence } from 'framer-motion';
+import { profilesData, ProfileData } from '@/data/profiles';
 import { useAudio } from '@/hooks/useAudio';
 import MapBackground from './MapBackground';
 import MapPin from './MapPin';
@@ -13,15 +13,18 @@ const RETICLE_RADIUS = 60;
 
 export default function MapInterface() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [showLocationsDrawer, setShowLocationsDrawer] = useState(false);
+  const closedPinId = useRef<string | null>(null);
+
   const { playHover, playSelect } = useAudio();
-  
   const containerRef = useRef<HTMLDivElement>(null);
   
   const mapX = useMotionValue(0);
   const mapY = useMotionValue(0);
-  const mapScale = useMotionValue(1);
+  const mapScale = useMotionValue(0.45);
 
-  const minScale = 0.3;
+  const minScale = 0.25;
 
   // Center the map initially
   useEffect(() => {
@@ -34,10 +37,7 @@ export default function MapInterface() {
         mapScale.set(currentScale);
       }
 
-      // We want the center of the map (MAP_WIDTH/2) to be at the center of the screen (clientWidth/2)
-      // Visual center X = mapX + MAP_WIDTH/2
-      // We want Visual center X = clientWidth/2
-      // Therefore, mapX = clientWidth/2 - MAP_WIDTH/2
+      // Initial visual center X = mapX + MAP_WIDTH/2
       mapX.set(clientWidth / 2 - MAP_WIDTH / 2);
       mapY.set(clientHeight / 2 - MAP_HEIGHT / 2);
     }
@@ -56,15 +56,12 @@ export default function MapInterface() {
     let foundId: string | null = null;
 
     for (const profile of profilesData) {
-      // With default transformOrigin (center), the visual center of the map is:
       const visualMapCenterX = mapX.get() + MAP_WIDTH / 2;
       const visualMapCenterY = mapY.get() + MAP_HEIGHT / 2;
 
-      // The pin's offset from the center of the unscaled map:
       const offsetX = profile.coordinates.x - MAP_WIDTH / 2;
       const offsetY = profile.coordinates.y - MAP_HEIGHT / 2;
 
-      // The actual visual screen coordinate of the pin:
       const pinScreenX = visualMapCenterX + (offsetX * scale);
       const pinScreenY = visualMapCenterY + (offsetY * scale);
 
@@ -78,11 +75,17 @@ export default function MapInterface() {
 
     if (foundId !== selectedId) {
       if (foundId) {
-        playSelect();
-      } else if (selectedId) {
-        playHover();
+        if (foundId !== closedPinId.current) {
+          playSelect();
+          setSelectedId(foundId);
+        }
+      } else {
+        if (selectedId) {
+          playHover();
+        }
+        closedPinId.current = null;
+        setSelectedId(null);
       }
-      setSelectedId(foundId);
     }
   }, [mapX, mapY, mapScale, selectedId, playSelect, playHover]);
 
@@ -90,34 +93,77 @@ export default function MapInterface() {
   useMotionValueEvent(mapY, 'change', checkCollisions);
   useMotionValueEvent(mapScale, 'change', checkCollisions);
 
+  // Zoom logic
+  const doZoom = useCallback((newScale: number, animateZoom: boolean) => {
+    if (!containerRef.current) return;
+    const { clientWidth, clientHeight } = containerRef.current;
+    const oldScale = mapScale.get();
+    const screenCenterX = clientWidth / 2;
+    const screenCenterY = clientHeight / 2;
+    
+    const offsetX = (screenCenterX - mapX.get() - MAP_WIDTH / 2) / oldScale;
+    const offsetY = (screenCenterY - mapY.get() - MAP_HEIGHT / 2) / oldScale;
+    
+    const newX = screenCenterX - MAP_WIDTH / 2 - offsetX * newScale;
+    const newY = screenCenterY - MAP_HEIGHT / 2 - offsetY * newScale;
+
+    if (animateZoom) {
+      animate(mapScale, newScale, { duration: 0.15 });
+      animate(mapX, newX, { duration: 0.15 });
+      animate(mapY, newY, { duration: 0.15 });
+    } else {
+      mapScale.set(newScale);
+      mapX.set(newX);
+      mapY.set(newY);
+    }
+  }, [mapScale, mapX, mapY]);
+
+  // Focus Camera onto a Specific Pin
+  const focusPin = useCallback((profile: ProfileData, targetZoom?: number) => {
+    if (!containerRef.current) return;
+    const { clientWidth, clientHeight } = containerRef.current;
+    const currentScale = mapScale.get();
+    const scale = targetZoom ?? Math.max(currentScale, 0.65);
+
+    const targetX = (clientWidth / 2) - (MAP_WIDTH / 2) - (profile.coordinates.x - MAP_WIDTH / 2) * scale;
+    const targetY = (clientHeight / 2) - (MAP_HEIGHT / 2) - (profile.coordinates.y - MAP_HEIGHT / 2) * scale;
+
+    playSelect();
+    closedPinId.current = null;
+    setSelectedId(profile.id);
+
+    animate(mapScale, scale, { duration: 0.7, ease: [0.16, 1, 0.3, 1] });
+    animate(mapX, targetX, { duration: 0.7, ease: [0.16, 1, 0.3, 1] });
+    animate(mapY, targetY, { duration: 0.7, ease: [0.16, 1, 0.3, 1] });
+  }, [mapScale, mapX, mapY, playSelect]);
+
+  // Recenter Map
+  const handleRecenter = useCallback(() => {
+    if (!containerRef.current) return;
+    const { clientWidth, clientHeight } = containerRef.current;
+    const defaultScale = 0.45;
+    const targetX = clientWidth / 2 - MAP_WIDTH / 2;
+    const targetY = clientHeight / 2 - MAP_HEIGHT / 2;
+    playHover();
+    closedPinId.current = null;
+    setSelectedId(null);
+    animate(mapScale, defaultScale, { duration: 0.7, ease: [0.16, 1, 0.3, 1] });
+    animate(mapX, targetX, { duration: 0.7, ease: [0.16, 1, 0.3, 1] });
+    animate(mapY, targetY, { duration: 0.7, ease: [0.16, 1, 0.3, 1] });
+  }, [mapScale, mapX, mapY, playHover]);
+
+  const handleZoomIn = useCallback(() => {
+    playHover();
+    doZoom(Math.min(mapScale.get() + 0.15, 2), true);
+  }, [mapScale, doZoom, playHover]);
+
+  const handleZoomOut = useCallback(() => {
+    playHover();
+    doZoom(Math.max(mapScale.get() - 0.15, minScale), true);
+  }, [mapScale, doZoom, playHover, minScale]);
+
   // Keyboard and Wheel handling
   useEffect(() => {
-    const doZoom = (newScale: number, animateZoom: boolean) => {
-      if (!containerRef.current) return;
-      const { clientWidth, clientHeight } = containerRef.current;
-      const oldScale = mapScale.get();
-      const screenCenterX = clientWidth / 2;
-      const screenCenterY = clientHeight / 2;
-      
-      // Calculate the map offset currently under the screen center
-      const offsetX = (screenCenterX - mapX.get() - MAP_WIDTH / 2) / oldScale;
-      const offsetY = (screenCenterY - mapY.get() - MAP_HEIGHT / 2) / oldScale;
-      
-      // Calculate new mapX/mapY so the same offset stays under the screen center
-      const newX = screenCenterX - MAP_WIDTH / 2 - offsetX * newScale;
-      const newY = screenCenterY - MAP_HEIGHT / 2 - offsetY * newScale;
-
-      if (animateZoom) {
-        animate(mapScale, newScale, { duration: 0.1 });
-        animate(mapX, newX, { duration: 0.1 });
-        animate(mapY, newY, { duration: 0.1 });
-      } else {
-        mapScale.set(newScale);
-        mapX.set(newX);
-        mapY.set(newY);
-      }
-    };
-
     const handleKeyDown = (e: KeyboardEvent) => {
       const panSpeed = 60;
       let newX = mapX.get();
@@ -134,11 +180,25 @@ export default function MapInterface() {
         animate(mapY, newY, { duration: 0.1 });
       }
 
-      if (e.key.toLowerCase() === 'z') {
+      if (e.key.toLowerCase() === 'z' || e.key === '+') {
         doZoom(Math.min(mapScale.get() + 0.1, 2), true);
       }
-      if (e.key.toLowerCase() === 'x') {
+      if (e.key.toLowerCase() === 'x' || e.key === '-') {
         doZoom(Math.max(mapScale.get() - 0.1, minScale), true);
+      }
+      if (e.key.toLowerCase() === 'l' || e.key.toLowerCase() === 'm') {
+        playHover();
+        setShowLocationsDrawer(prev => !prev);
+      }
+      if (e.key === 'Escape') {
+        if (selectedId) {
+          playHover();
+          closedPinId.current = selectedId;
+          setSelectedId(null);
+        } else if (showLocationsDrawer) {
+          playHover();
+          setShowLocationsDrawer(false);
+        }
       }
     };
     
@@ -163,7 +223,7 @@ export default function MapInterface() {
         container.removeEventListener('wheel', handleWheel);
       }
     };
-  }, [mapX, mapY, mapScale]);
+  }, [mapX, mapY, mapScale, doZoom, playHover, selectedId, showLocationsDrawer, minScale]);
 
   return (
     <div className={styles.container} ref={containerRef}>
@@ -190,28 +250,149 @@ export default function MapInterface() {
             key={profile.id}
             profile={profile}
             isSelected={selectedId === profile.id}
-            isHovered={false}
-            onHoverStart={() => {}}
-            onHoverEnd={() => {}}
-            onClick={() => {}}
+            isHovered={hoveredId === profile.id}
+            onHoverStart={() => {
+              playHover();
+              setHoveredId(profile.id);
+            }}
+            onHoverEnd={() => {
+              setHoveredId(null);
+            }}
+            onClick={() => {
+              focusPin(profile);
+            }}
           />
         ))}
       </motion.div>
 
+      {/* Screen Center Crosshair Reticle */}
       <div className={`${styles.crosshair} ${selectedId ? styles.active : ''}`}>
         <div className={styles.crosshairCenter} />
         <span className={styles.crosshairLabel}>
-          {selectedId ? 'TARGET LOCKED' : 'SEARCHING...'}
+          {selectedProfile ? `LOCKED // ${selectedProfile.name.toUpperCase()}` : 'SCANNING MAP...'}
         </span>
       </div>
 
-      <div className={styles.instructions}>
-        DRAG or ARROWS: Pan | SCROLL or Z/X: Zoom
+      {/* On-screen Tactical Controls HUD */}
+      <div className={styles.controlsHud}>
+        <button 
+          className={`${styles.hudButton} ${showLocationsDrawer ? styles.active : ''}`}
+          onClick={() => {
+            playHover();
+            setShowLocationsDrawer(!showLocationsDrawer);
+          }}
+          aria-label="Toggle Tactical Locations Directory"
+        >
+          <span>☰</span>
+          <span>LOCATIONS [{profilesData.length}]</span>
+        </button>
+        
+        <button 
+          className={styles.hudButton}
+          onClick={handleRecenter}
+          title="Recenter Map View"
+          aria-label="Recenter Map"
+        >
+          <span>⌖</span>
+          <span>RECENTER</span>
+        </button>
+
+        <div className={styles.zoomButtonGroup}>
+          <button 
+            className={styles.zoomButton} 
+            onClick={handleZoomIn} 
+            title="Zoom In (+ / Z)"
+            aria-label="Zoom In"
+          >
+            +
+          </button>
+          <button 
+            className={styles.zoomButton} 
+            onClick={handleZoomOut} 
+            title="Zoom Out (- / X)"
+            aria-label="Zoom Out"
+          >
+            −
+          </button>
+        </div>
       </div>
 
+      {/* Tactical Locations Directory Drawer */}
+      <AnimatePresence>
+        {showLocationsDrawer && (
+          <motion.div 
+            className={styles.locationsDrawer}
+            initial={{ opacity: 0, x: -20, scale: 0.95 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: -20, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            role="region"
+            aria-label="Locations Directory"
+          >
+            <div className={styles.drawerHeader}>
+              <span className={styles.drawerTitle}>TACTICAL DIRECTORY</span>
+              <button 
+                className={styles.drawerClose}
+                onClick={() => {
+                  playHover();
+                  setShowLocationsDrawer(false);
+                }}
+                aria-label="Close Directory"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className={styles.locationsList}>
+              {profilesData.map((p, idx) => (
+                <button
+                  key={p.id}
+                  className={`${styles.locationItem} ${selectedId === p.id ? styles.active : ''}`}
+                  onMouseEnter={() => {
+                    playHover();
+                    setHoveredId(p.id);
+                  }}
+                  onMouseLeave={() => setHoveredId(null)}
+                  onClick={() => {
+                    focusPin(p);
+                  }}
+                >
+                  <div className={styles.locationItemLeft}>
+                    <span className={styles.locationIndex}>0{idx + 1}</span>
+                    <span className={styles.locationName}>{p.name}</span>
+                  </div>
+                  <span className={styles.locationCategory}>{p.category}</span>
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Atmospheric Viewport Compass */}
+      <div className={styles.compass} aria-hidden="true">
+        <div className={styles.compassN}>N</div>
+        <div className={styles.compassCross}>
+          <div className={styles.compassW}>W</div>
+          <div className={styles.compassCenter}>+</div>
+          <div className={styles.compassE}>E</div>
+        </div>
+        <div className={styles.compassS}>S</div>
+      </div>
+
+      {/* Control Instructions */}
+      <div className={styles.instructions}>
+        DRAG or ARROWS: Pan | SCROLL or Z/X: Zoom | L: Locations | ESC: Close
+      </div>
+
+      {/* Selected Profile Detail Panel */}
       <ProfilePanel 
         profile={selectedProfile} 
-        onClose={() => {}} 
+        onClose={() => {
+          playHover();
+          closedPinId.current = selectedId;
+          setSelectedId(null);
+        }} 
       />
 
     </div>

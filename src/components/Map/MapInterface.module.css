@@ -65,16 +65,261 @@
 
 .instructions {
   position: absolute;
-  bottom: 20px;
+  bottom: 25px;
   left: 30px;
-  color: rgba(200, 180, 150, 0.5);
+  color: rgba(200, 180, 150, 0.6);
   font-family: monospace;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   letter-spacing: 1px;
   z-index: 50;
   pointer-events: none;
-  background: rgba(10, 10, 10, 0.6);
-  padding: 8px 12px;
-  border-radius: 4px;
+  background: rgba(14, 12, 10, 0.75);
+  padding: 6px 12px;
+  border-radius: 2px;
   border: 1px solid rgba(200, 180, 150, 0.2);
+}
+
+/* Tactical Map Controls HUD */
+.controlsHud {
+  position: absolute;
+  bottom: 65px;
+  left: 30px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 55;
+}
+
+.hudButton {
+  background: rgba(18, 15, 12, 0.85);
+  border: 1px solid rgba(200, 180, 150, 0.35);
+  color: rgba(200, 180, 150, 0.85);
+  font-family: monospace;
+  font-size: 0.75rem;
+  letter-spacing: 1.5px;
+  padding: 8px 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 2px;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(6px);
+}
+
+.hudButton:hover {
+  background: rgba(200, 180, 150, 0.18);
+  border-color: rgba(200, 180, 150, 0.75);
+  color: #f0e6d2;
+  box-shadow: 0 0 10px rgba(200, 180, 150, 0.2);
+}
+
+.hudButton.active {
+  background: rgba(200, 180, 150, 0.25);
+  border-color: #f0e6d2;
+  color: #f0e6d2;
+}
+
+.zoomButtonGroup {
+  display: flex;
+  gap: 2px;
+}
+
+.zoomButton {
+  background: rgba(18, 15, 12, 0.85);
+  border: 1px solid rgba(200, 180, 150, 0.35);
+  color: rgba(200, 180, 150, 0.85);
+  font-family: monospace;
+  font-size: 0.85rem;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(6px);
+}
+
+.zoomButton:hover {
+  background: rgba(200, 180, 150, 0.18);
+  border-color: rgba(200, 180, 150, 0.75);
+  color: #f0e6d2;
+}
+
+/* Tactical Locations Drawer */
+.locationsDrawer {
+  position: absolute;
+  top: 90px;
+  left: 30px;
+  width: 320px;
+  max-height: calc(100vh - 200px);
+  background: rgba(14, 12, 10, 0.94);
+  border: 1px solid rgba(150, 130, 100, 0.35);
+  border-radius: 2px;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  overflow: hidden;
+}
+
+.drawerHeader {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(150, 130, 100, 0.25);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(25, 20, 16, 0.6);
+}
+
+.drawerTitle {
+  font-family: monospace;
+  font-size: 0.75rem;
+  font-weight: bold;
+  letter-spacing: 2px;
+  color: #f0e6d2;
+}
+
+.drawerClose {
+  background: none;
+  border: none;
+  color: rgba(200, 180, 150, 0.6);
+  font-family: monospace;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 2px 6px;
+}
+
+.drawerClose:hover {
+  color: #f0e6d2;
+}
+
+.locationsList {
+  overflow-y: auto;
+  max-height: 380px;
+}
+
+.locationsList::-webkit-scrollbar {
+  width: 4px;
+}
+.locationsList::-webkit-scrollbar-thumb {
+  background: rgba(150, 130, 100, 0.3);
+}
+
+.locationItem {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(200, 180, 150, 0.08);
+  color: rgba(200, 180, 150, 0.8);
+  font-family: monospace;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+}
+
+.locationItem:hover, .locationItem.active {
+  background: rgba(200, 180, 150, 0.12);
+  color: #f0e6d2;
+  border-left: 3px solid rgba(200, 180, 150, 0.8);
+}
+
+.locationItemLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.locationIndex {
+  color: rgba(150, 130, 100, 0.6);
+  font-size: 0.7rem;
+}
+
+.locationName {
+  font-size: 0.8rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.locationCategory {
+  font-size: 0.65rem;
+  color: rgba(150, 130, 100, 0.6);
+  text-transform: uppercase;
+}
+
+/* Viewport Compass */
+.compass {
+  position: absolute;
+  bottom: 25px;
+  right: 35px;
+  width: 70px;
+  height: 70px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: rgba(200, 180, 150, 0.4);
+  font-family: monospace;
+  z-index: 50;
+  pointer-events: none;
+  border: 1px solid rgba(200, 180, 150, 0.18);
+  border-radius: 50%;
+  background: rgba(14, 12, 10, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+.compassN {
+  position: absolute;
+  top: 4px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: rgba(200, 180, 150, 0.75);
+}
+
+.compassS {
+  position: absolute;
+  bottom: 4px;
+  font-size: 0.7rem;
+}
+
+.compassCross {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 6px;
+  font-size: 0.7rem;
+}
+
+.compassCenter {
+  font-size: 1rem;
+  color: rgba(200, 180, 150, 0.6);
+}
+
+@media (max-width: 768px) {
+  .locationsDrawer {
+    width: calc(100vw - 40px);
+    left: 20px;
+    top: 80px;
+  }
+  .controlsHud {
+    left: 15px;
+    bottom: 55px;
+  }
+  .instructions {
+    display: none;
+  }
+  .compass {
+    right: 15px;
+    bottom: 15px;
+    width: 55px;
+    height: 55px;
+  }
 }

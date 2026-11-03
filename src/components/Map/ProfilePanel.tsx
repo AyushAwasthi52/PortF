@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ProfileData } from '@/data/profiles';
 import styles from './ProfilePanel.module.css';
@@ -11,8 +11,6 @@ interface ProfilePanelProps {
 export default function ProfilePanel({ profile, onClose }: ProfilePanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
 
-  // Focus trap and escape handling could go here, but ESC is handled in MapInterface
-  
   return (
     <AnimatePresence>
       {profile && (
@@ -22,17 +20,17 @@ export default function ProfilePanel({ profile, onClose }: ProfilePanelProps) {
           initial={{ x: '100%', opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           exit={{ x: '100%', opacity: 0 }}
-          transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+          transition={{ type: 'spring', damping: 25, stiffness: 220 }}
           role="dialog"
           aria-labelledby="profile-title"
         >
           <div className={styles.header}>
             <div className={styles.headerTop}>
               <h2 id="profile-title" className={styles.title}>{profile.name}</h2>
-              <span className={styles.icon}>{profile.icon}</span>
+              <span className={styles.categoryBadge}>{profile.category}</span>
             </div>
             <div className={styles.username}>{profile.username}</div>
-            <div className={styles.category}>{profile.category}</div>
+            {profile.sector && <div className={styles.category}>{profile.sector}</div>}
           </div>
 
           <div className={styles.content}>
@@ -55,10 +53,10 @@ export default function ProfilePanel({ profile, onClose }: ProfilePanelProps) {
               rel="noopener noreferrer" 
               className={styles.actionButton}
             >
-              [ VIEW PROFILE ]
+              [ VIEW PROFILE ↗ ]
             </a>
-            <button className={styles.closeButton} onClick={onClose}>
-              [ CLOSE ]
+            <button className={styles.closeButton} onClick={onClose} aria-label="Close profile panel">
+              [ ESC // CLOSE ]
             </button>
           </div>
         </motion.div>
